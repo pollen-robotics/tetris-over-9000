@@ -12,6 +12,7 @@ class Tetris(object):
         self.board = np.zeros((params.n_rows, params.n_cols), dtype=np.uint8)
         self.piece = Piece.generate_random_new()
         self.nb_lines = 0
+        self.done = False
 
     def translate_piece(self, dx):
         new_x = self.piece.x + dx
@@ -36,7 +37,7 @@ class Tetris(object):
 
             self.piece = Piece.generate_random_new()
             if self.check_collision(self.piece, self.piece.pos):
-                self.reset()
+                self.done = True
 
     @property
     def state(self):
