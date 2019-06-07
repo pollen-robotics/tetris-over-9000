@@ -16,7 +16,7 @@ class TetrisEnv(gym.Env):
         'drop',
     ]
 
-    def __init__(self, max_steps):
+    def __init__(self, drop_period=5):
         gym.Env.__init__(self)
 
         self.observation_space = gym.spaces.Box(
@@ -26,6 +26,9 @@ class TetrisEnv(gym.Env):
         self.action_space = gym.spaces.Discrete(len(TetrisEnv.actions))
 
         self.game = Tetris()
+
+        self.last_drop = 0
+        self.drop_period = drop_period
 
     def reset(self):
         self.game.reset()
@@ -44,6 +47,11 @@ class TetrisEnv(gym.Env):
             self.game.rotate_piece(clockwise=False)
         elif action == 'drop':
             self.game.drop()
+
+        self.last_drop += 1
+        if self.last_drop > self.drop_period:
+            self.game.drop()
+            self.last_drop = 0
 
         return self.game.state, 1, self.game.done, {}
 
