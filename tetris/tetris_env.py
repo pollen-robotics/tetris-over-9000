@@ -17,8 +17,10 @@ class TetrisEnv(gym.Env):
     ]
 
     def __init__(self, max_steps):
+        gym.Env.__init__(self)
+
         self.observation_space = gym.spaces.Box(
-            low=0, high=8, shape=(params.n_rows, params.n_cols),
+            low=0, high=8, shape=(params.n_rows, params.n_cols, 1),
             dtype=np.uint8
         )
         self.action_space = gym.spaces.Discrete(len(TetrisEnv.actions))
@@ -48,16 +50,6 @@ class TetrisEnv(gym.Env):
     def render(self, mode='human'):
         # return True
         pass
-
-
-gym.envs.registration.register(
-    id='Tetris-v0',
-    entry_point='tetris.tetris_env:TetrisEnv',
-    max_episode_steps=9999999,
-    reward_threshold=32000,
-    kwargs={'max_steps': np.inf},
-    nondeterministic=True,
-)
 
 
 if __name__ == '__main__':
