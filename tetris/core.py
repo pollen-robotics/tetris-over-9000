@@ -37,6 +37,7 @@ class Tetris(object):
 
             self.piece = Piece.generate_random_new()
             if self.check_collision(self.piece, self.piece.pos):
+                self.reset()
                 self.done = True
 
     @property
