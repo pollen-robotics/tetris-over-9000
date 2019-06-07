@@ -46,7 +46,7 @@ class Tetris(object):
         lx, rx, ly, ry = self.piece.get_range_at(self.piece.pos)
         state[ly:ry, lx:rx] += self.piece.shape
 
-        return state
+        return np.expand_dims(state, axis=-1)
 
     def check_collision(self, piece, pos):
         lx, rx, ly, ry = piece.get_range_at(pos)
