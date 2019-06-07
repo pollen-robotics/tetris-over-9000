@@ -3,10 +3,21 @@ import numpy as np
 
 from .core import Tetris, params
 
+brick_size = 35
+colors = {
+    1: (149, 0, 237),
+    2: (238, 0, 0),
+    3: (0, 238, 0),
+    4: (0, 0, 238),
+    5: (238, 149, 0),
+    6: (0, 238, 238),
+    7: (238, 238, 0),
+}
+
 
 class TetrisEnv(gym.Env):
     metadata = {
-        'render.modes': ['human'],
+        'render.modes': ['human', 'rgb_array'],
     }
 
     actions = [
@@ -29,6 +40,8 @@ class TetrisEnv(gym.Env):
 
         self.last_drop = 0
         self.drop_period = drop_period
+
+        self.viewer = None
 
     def reset(self):
         self.game.reset()
@@ -61,21 +74,28 @@ class TetrisEnv(gym.Env):
         return self.game.state, 1, self.game.done, {}
 
     def render(self, mode='human'):
-        # return True
-        pass
+        from gym.envs.classic_control import rendering
+        if self.viewer is None:
+            self.viewer = rendering.Viewer(
+                brick_size * params.n_cols,
+                brick_size * params.n_rows
+            )
 
+        cur_state = self.game.state.copy()
 
-if __name__ == '__main__':
-    import gym
-    import tetris.tetris_env
+        for y in range(params.n_rows):
+            for x in range(params.n_cols):
+                brick_id = cur_state[y, x, 0]
+                if brick_id != 0:
+                    top = ((params.n_rows - 1) - y) * brick_size
+                    left = x * brick_size
 
-    env = gym.make('Tetris-v0')
-    env.reset()
+                    path = [
+                        (left, top),
+                        (left + brick_size, top),
+                        (left + brick_size, top + brick_size),
+                        (left, top + brick_size)
+                    ]
+                    self.viewer.draw_polygon(path, color=colors[brick_id])
 
-    done = False
-    R = 0
-
-    while not done:
-        state, reward, done, _ = env.step(env.action_space.sample())
-        R += reward
-    print(R)
+        return self.viewer.render(return_rgb_array=(mode == 'rgb_array'))
