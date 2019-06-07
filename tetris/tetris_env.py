@@ -32,6 +32,8 @@ class TetrisEnv(gym.Env):
 
     def reset(self):
         self.game.reset()
+        self.last_drop = 0
+
         return self.game.state
 
     def step(self, action):
@@ -48,9 +50,12 @@ class TetrisEnv(gym.Env):
         elif action == 'drop':
             self.game.drop()
 
-        self.last_drop += 1
-        if self.last_drop > self.drop_period:
-            self.game.drop()
+        if not self.game.done:
+            self.last_drop += 1
+            if self.last_drop > self.drop_period:
+                self.game.drop()
+                self.last_drop = 0
+        else:
             self.last_drop = 0
 
         return self.game.state, 1, self.game.done, {}
