@@ -41,11 +41,14 @@ class TetrisEnv(gym.Env):
         self.last_drop = 0
         self.drop_period = drop_period
 
+        self.last_nb_piece = 0
+
         self.viewer = None
 
     def reset(self):
         self.game.reset()
         self.last_drop = 0
+        self.last_nb_piece = 0
 
         return self.game.state
 
@@ -71,7 +74,10 @@ class TetrisEnv(gym.Env):
         else:
             self.last_drop = 0
 
-        return self.game.state, 1, self.game.done, {}
+        rew = 1 if self.last_nb_piece != self.game.nb_piece else 0
+        self.last_nb_piece = self.game.nb_piece
+
+        return self.game.state, rew, self.game.done, {}
 
     def render(self, mode='human'):
         from gym.envs.classic_control import rendering

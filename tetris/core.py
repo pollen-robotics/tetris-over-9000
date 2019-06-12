@@ -12,6 +12,7 @@ class Tetris(object):
         self.board = np.zeros((params.n_rows, params.n_cols), dtype=np.uint8)
         self.piece = Piece.generate_random_new()
         self.nb_lines = 0
+        self.nb_piece = 1
         self.done = False
 
     def translate_piece(self, dx):
@@ -36,6 +37,8 @@ class Tetris(object):
             self.check_and_remove_full_lines()
 
             self.piece = Piece.generate_random_new()
+            self.nb_piece += 1
+
             if self.check_collision(self.piece, self.piece.pos):
                 self.reset()
                 self.done = True
