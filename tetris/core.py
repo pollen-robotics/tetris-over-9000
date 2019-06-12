@@ -5,8 +5,18 @@ from .piece import Piece
 
 
 class Tetris(object):
-    def __init__(self):
-        self.reset()
+    def __init__(self, reset=True):
+        if reset:
+            self.reset()
+
+    def copy(self):
+        t = Tetris(reset=False)
+        t.board = self.board.copy()
+        t.piece = self.piece.copy()
+        t.nb_lines = self.nb_lines
+        t.nb_piece = self.nb_piece
+        t.done = self.done
+        return t
 
     def reset(self):
         self.board = np.zeros((params.n_rows, params.n_cols), dtype=np.uint8)

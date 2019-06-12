@@ -9,6 +9,9 @@ class Piece(object):
         self.x = x
         self.y = y
 
+    def copy(self):
+        return Piece(self.shape.copy(), self.x, self.y)
+
     @property
     def pos(self):
         return self.x, self.y
