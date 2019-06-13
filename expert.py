@@ -1,3 +1,5 @@
+import numpy as np
+
 from stable_baselines.gail import generate_expert_traj
 
 from tetris import TetrisEnv
@@ -10,19 +12,19 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('episod', type=int)
-    parser.add_argument('outputdir')
+    parser.add_argument('output_dir')
     args = parser.parse_args()
 
-    save_path = os.path.join(args.outputdir, 'trajs-{}'.format(args.episod))
-    if os.path.exists(save_path):
-        raise OSError(save_path, 'already exists!')
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir)
 
-    if not os.path.exists(args.outputdir):
-        os.makedirs(args.outputdir)
+    filename = os.path.join(args.output_dir, 'dataset-{}.npz'.format(args.episod))
+    if os.path.exists(filename):
+        raise OSError(filename, 'already exists!')
 
     env = TetrisEnv()
     model = Bot(env)
     trajs = generate_expert_traj(model.predict, env=env,
                                  n_episodes=args.episod,
-                                 save_path=save_path,
-                                 image_folder=os.path.join(save_path, 'img'))
+                                 save_path=None, image_folder=None)
+    np.savez(filename, **trajs)
