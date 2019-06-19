@@ -27,7 +27,14 @@ class TetrisEnv(gym.Env):
         'drop',
     ]
 
-    def __init__(self, drop_period=5):
+    available_rewards = (
+        'lines completed',  # number of lines cleared by previous action
+        'new pieces',  # +1 if a new piece appeared else 0
+        'each step',  # +1 at each time step
+        'matris',  # +1 per drop + 100 * (nb lines ** 2)
+    )
+
+    def __init__(self, rewards, drop_period=5):
         gym.Env.__init__(self)
 
         self.observation_space = gym.spaces.Box(
@@ -36,12 +43,17 @@ class TetrisEnv(gym.Env):
         )
         self.action_space = gym.spaces.Discrete(len(TetrisEnv.actions))
 
+        if rewards not in TetrisEnv.available_rewards:
+            raise ValueError('rewards should be one of {}'.format(TetrisEnv.available_rewards))
+        self.rewards = rewards
+
         self.game = Tetris()
 
         self.last_drop = 0
         self.drop_period = drop_period
 
         self.last_nb_piece = 0
+        self.last_nb_line = 0
 
         self.viewer = None
 
@@ -74,10 +86,25 @@ class TetrisEnv(gym.Env):
         else:
             self.last_drop = 0
 
-        rew = 1 if self.last_nb_piece != self.game.nb_piece else 0
-        self.last_nb_piece = self.game.nb_piece
+        return self.game.state, self.compute_rewards(action), self.game.done, {}
 
-        return self.game.state, rew, self.game.done, {}
+    def compute_rewards(self, action):
+        cleared_lines = max(self.game.nb_lines - self.last_nb_line, 0)
+
+        if self.rewards == 'lines completed':
+            reward = cleared_lines
+        elif self.rewards == 'new pieces':
+            reward = 1 if self.last_nb_piece != self.game.nb_piece else 0
+        elif self.rewards == 'each step':
+            reward = 1
+        elif self.rewards == 'matris':
+            reward = 1 if action == 'drop' else 0
+            reward += 100 * cleared_lines ** 2
+
+        self.last_nb_piece = self.game.nb_piece
+        self.last_nb_line = self.game.nb_lines
+
+        return reward
 
     def render(self, mode='human'):
         from gym.envs.classic_control import rendering
