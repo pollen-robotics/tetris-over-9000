@@ -113,6 +113,12 @@ class TetrisEnv(gym.Env):
         return reward
 
     def render(self, mode='human'):
+        if mode == 'human':
+            return self.render_human()
+
+        return self.render_array()
+
+    def render_human(self):
         from gym.envs.classic_control import rendering
         if self.viewer is None:
             self.viewer = rendering.Viewer(
@@ -137,4 +143,22 @@ class TetrisEnv(gym.Env):
                     ]
                     self.viewer.draw_polygon(path, color=colors[brick_id])
 
-        return self.viewer.render(return_rgb_array=(mode == 'rgb_array'))
+        return self.viewer.render(return_rgb_array=False)
+
+    def render_array(self):
+        img = np.zeros(
+            (brick_size * params.n_rows, brick_size * params.n_cols, 3),
+            dtype=np.uint8,
+        )
+
+        cur_state = self.game.state.copy()
+
+        for y in range(params.n_rows):
+            for x in range(params.n_cols):
+                brick_id = cur_state[y, x, 0]
+                if brick_id != 0:
+                    img[
+                        y * brick_size: (y + 1) * brick_size,
+                        x * brick_size: (x + 1) * brick_size
+                    ] = colors[brick_id]
+        return img
