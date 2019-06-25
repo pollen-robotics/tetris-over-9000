@@ -38,7 +38,7 @@ class TetrisEnv(gym.Env):
         gym.Env.__init__(self)
 
         self.observation_space = gym.spaces.Box(
-            low=0, high=8, shape=(params.n_rows, params.n_cols, 1),
+            low=0, high=1, shape=(params.n_rows, params.n_cols, 1),
             dtype=np.uint8
         )
         self.action_space = gym.spaces.Discrete(len(TetrisEnv.actions))
@@ -57,12 +57,18 @@ class TetrisEnv(gym.Env):
 
         self.viewer = None
 
+    @property
+    def state(self):
+        state = self.game.state.copy()
+        state[state != 1] = 1
+        return state
+
     def reset(self):
         self.game.reset()
         self.last_drop = 0
         self.last_nb_piece = 0
 
-        return self.game.state
+        return self.state
 
     def step(self, action):
         action = TetrisEnv.actions[action]
@@ -86,7 +92,7 @@ class TetrisEnv(gym.Env):
         else:
             self.last_drop = 0
 
-        return self.game.state, self.compute_rewards(action), self.game.done, {}
+        return self.state, self.compute_rewards(action), self.game.done, {}
 
     def compute_rewards(self, action):
         cleared_lines = max(self.game.nb_lines - self.last_nb_line, 0)
